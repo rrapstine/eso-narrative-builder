@@ -1,16 +1,16 @@
 // ==UserScript==
 // @name         ESO Narrative Builder
 // @namespace    https://github.com/rrapstine/
-// @version      1.1.0
+// @version      1.2.0
 // @description  Build patient care narratives from templates with dynamic form fields
 // @author       Richard F Rapstine III
 // @match        https://*.esosuite.net/*
 // @match        https://*.esosuite.com/*
-// @grant        GM_getValue
-// @grant        GM_setValue
 // @grant        GM_registerMenuCommand
 // @grant        GM_setClipboard
 // @run-at       document-idle
+// @downloadURL  https://raw.githubusercontent.com/rrapstine/eso-narrative-builder/master/eso-narrative-builder.user.js
+// @updateURL    https://raw.githubusercontent.com/rrapstine/eso-narrative-builder/master/eso-narrative-builder.user.js
 // ==/UserScript==
 
 (function () {
