@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ESO Narrative Builder
 // @namespace    https://github.com/rrapstine/
-// @version      1.2.0
+// @version      1.2.1
 // @description  Build patient care narratives from templates with dynamic form fields
 // @author       Richard F Rapstine III
 // @match        https://*.esosuite.net/*
@@ -290,16 +290,16 @@ EOR.`;
 
             switch (varName) {
                 case 'XRAY_RESULTS':
-                    value = trimmed ? `X-ray remarkable for ${trimmed}` : DEFAULTS.XRAY_RESULTS;
+                    value = trimmed ? `remarkable for ${trimmed}` : DEFAULTS.XRAY_RESULTS;
                     break;
                 case 'CT_RESULTS':
-                    value = trimmed ? `CT remarkable for ${trimmed}` : DEFAULTS.CT_RESULTS;
+                    value = trimmed ? `remarkable for ${trimmed}` : DEFAULTS.CT_RESULTS;
                     break;
                 case 'LABS_RESULTS':
-                    value = trimmed ? `Labs remarkable for ${trimmed}` : DEFAULTS.LABS_RESULTS;
+                    value = trimmed ? `remarkable for ${trimmed}` : DEFAULTS.LABS_RESULTS;
                     break;
                 case 'EKG_RESULTS':
-                    value = trimmed ? `12-lead EKG showed ${trimmed}` : DEFAULTS.EKG_RESULTS;
+                    value = trimmed ? `showed ${trimmed}` : DEFAULTS.EKG_RESULTS;
                     break;
                 case 'TRANSPORT_PT_MOVED':
                     value = trimmed ? `transferred via ${trimmed}` : DEFAULTS.TRANSPORT_PT_MOVED;
