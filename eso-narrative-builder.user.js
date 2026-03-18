@@ -62,15 +62,6 @@ EOR.`;
     };
 
     let modalVisible = false;
-    let settingsVisible = false;
-
-    function getTemplate() {
-        return GM_getValue('narrativeTemplate', DEFAULT_TEMPLATE);
-    }
-
-    function setTemplate(template) {
-        GM_setValue('narrativeTemplate', template);
-    }
 
     function parseVariables(template) {
         const regex = /\{\{(\w+)\}\}/g;
@@ -208,16 +199,6 @@ EOR.`;
         .enb-btn-link:hover {
             color: #0056b3;
         }
-        .enb-settings textarea {
-            width: 100%;
-            min-height: 300px;
-            font-family: monospace;
-            font-size: 13px;
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
         .enb-toast {
             position: fixed;
             bottom: 20px;
@@ -243,7 +224,7 @@ EOR.`;
     }
 
     function createFormModal() {
-        const template = getTemplate();
+        const template = DEFAULT_TEMPLATE;
         const variables = parseVariables(template);
 
         const overlay = document.createElement('div');
@@ -284,44 +265,8 @@ EOR.`;
                     </form>
                 </div>
                 <div class="enb-footer">
-                    <button class="enb-btn enb-btn-link" id="enb-open-settings">Edit Template</button>
-                    <div>
-                        <button class="enb-btn enb-btn-secondary" id="enb-cancel">Cancel</button>
-                        <button class="enb-btn enb-btn-primary" id="enb-submit">Copy to Clipboard</button>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        return overlay;
-    }
-
-    function createSettingsModal() {
-        const template = getTemplate();
-
-        const overlay = document.createElement('div');
-        overlay.className = 'enb-overlay';
-        overlay.id = 'enb-settings-modal';
-
-        overlay.innerHTML = `
-            <div class="enb-modal">
-                <div class="enb-header">
-                    <h2>Edit Template</h2>
-                    <button class="enb-close" id="enb-close-settings">&times;</button>
-                </div>
-                <div class="enb-body enb-settings">
-                    <p style="margin-top: 0; color: #666; font-size: 13px;">
-                        Use <code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">{{variable_name}}</code>
-                        for fields. Fields will be auto-generated from your template.
-                    </p>
-                    <textarea id="enb-template-input">${template}</textarea>
-                </div>
-                <div class="enb-footer">
-                    <button class="enb-btn enb-btn-link" id="enb-reset-template">Reset to Default</button>
-                    <div>
-                        <button class="enb-btn enb-btn-secondary" id="enb-settings-cancel">Cancel</button>
-                        <button class="enb-btn enb-btn-primary" id="enb-settings-save">Save Template</button>
-                    </div>
+                    <button class="enb-btn enb-btn-secondary" id="enb-cancel">Cancel</button>
+                    <button class="enb-btn enb-btn-primary" id="enb-submit">Copy to Clipboard</button>
                 </div>
             </div>
         `;
@@ -343,14 +288,33 @@ EOR.`;
             let value = formData.get(varName) || '';
             const trimmed = value.trim();
 
-            if (varName === 'TRANSPORT_PT_MOVED') {
-                value = trimmed ? `transferred via ${trimmed}` : DEFAULTS.TRANSPORT_PT_MOVED;
-            } else if (varName === 'PT_COMPLAINTS') {
-                value = trimmed ? `Patient currently complains of ${trimmed}` : DEFAULTS.PT_COMPLAINTS;
-            } else if (varName === 'PT_HISTORY') {
-                value = trimmed ? `Patient has relevant history of ${trimmed}` : DEFAULTS.PT_HISTORY;
-            } else if (!trimmed && DEFAULTS[varName] !== undefined) {
-                value = DEFAULTS[varName];
+            switch (varName) {
+                case 'XRAY_RESULTS':
+                    value = trimmed ? `X-ray remarkable for ${trimmed}` : DEFAULTS.XRAY_RESULTS;
+                    break;
+                case 'CT_RESULTS':
+                    value = trimmed ? `CT remarkable for ${trimmed}` : DEFAULTS.CT_RESULTS;
+                    break;
+                case 'LABS_RESULTS':
+                    value = trimmed ? `Labs remarkable for ${trimmed}` : DEFAULTS.LABS_RESULTS;
+                    break;
+                case 'EKG_RESULTS':
+                    value = trimmed ? `12-lead EKG showed ${trimmed}` : DEFAULTS.EKG_RESULTS;
+                    break;
+                case 'TRANSPORT_PT_MOVED':
+                    value = trimmed ? `transferred via ${trimmed}` : DEFAULTS.TRANSPORT_PT_MOVED;
+                    break;
+                case 'PT_COMPLAINTS':
+                    value = trimmed ? `Patient currently complains of ${trimmed}` : DEFAULTS.PT_COMPLAINTS;
+                    break;
+                case 'PT_HISTORY':
+                    value = trimmed ? `Patient has relevant history of ${trimmed}` : DEFAULTS.PT_HISTORY;
+                    break;
+                default:
+                    if (!trimmed && DEFAULTS[varName] !== undefined) {
+                        value = DEFAULTS[varName];
+                    }
+                    break;
             }
 
             return value;
@@ -388,16 +352,12 @@ EOR.`;
 
         modal.querySelector('#enb-close-form').addEventListener('click', hideFormModal);
         modal.querySelector('#enb-cancel').addEventListener('click', hideFormModal);
-        modal.querySelector('#enb-open-settings').addEventListener('click', () => {
-            hideFormModal();
-            showSettingsModal();
-        });
 
         modal.querySelector('#enb-submit').addEventListener('click', (e) => {
             e.preventDefault();
             const form = modal.querySelector('#enb-form');
             const formData = new FormData(form);
-            const template = getTemplate();
+            const template = DEFAULT_TEMPLATE;
             const filled = fillTemplate(template, formData);
 
             GM_setClipboard(filled);
@@ -414,56 +374,16 @@ EOR.`;
         modalVisible = false;
     }
 
-    function showSettingsModal() {
-        if (settingsVisible) return;
-
-        const existingModal = document.getElementById('enb-settings-modal');
-        if (existingModal) existingModal.remove();
-
-        const modal = createSettingsModal();
-        document.body.appendChild(modal);
-        settingsVisible = true;
-
-        setTimeout(() => {
-            modal.querySelector('textarea').focus();
-        }, 50);
-
-        modal.querySelector('#enb-close-settings').addEventListener('click', hideSettingsModal);
-        modal.querySelector('#enb-settings-cancel').addEventListener('click', hideSettingsModal);
-
-        modal.querySelector('#enb-reset-template').addEventListener('click', () => {
-            modal.querySelector('#enb-template-input').value = DEFAULT_TEMPLATE;
-        });
-
-        modal.querySelector('#enb-settings-save').addEventListener('click', () => {
-            const newTemplate = modal.querySelector('#enb-template-input').value;
-            setTemplate(newTemplate);
-            showToast('Template saved!');
-            hideSettingsModal();
-        });
-
-        setupCloseHandlers(modal, hideSettingsModal);
-    }
-
-    function hideSettingsModal() {
-        const modal = document.getElementById('enb-settings-modal');
-        if (modal) modal.remove();
-        settingsVisible = false;
-    }
-
     function init() {
         injectStyles();
 
         GM_registerMenuCommand('Build Narrative', showFormModal);
-        GM_registerMenuCommand('Edit Template', showSettingsModal);
 
         document.addEventListener('keydown', (e) => {
             if (e.altKey && e.code === 'Semicolon') {
                 e.preventDefault();
                 if (modalVisible) {
                     hideFormModal();
-                } else if (settingsVisible) {
-                    hideSettingsModal();
                 } else {
                     showFormModal();
                 }
